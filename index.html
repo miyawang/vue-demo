@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <!-- <div id="app">
+    小说：《name》 数量：
+    <span id="number">number</span>
+  </div>
+  <div>
+    <button id="addOne">+1</button>
+    <button id="minusOne">-1</button>
+    <button id="reset">清零</button>
+  </div> -->
+
+  <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdn.bootcss.com/axios/0.18.0/axios.min.js"></script>
+  <script>
+    fakeData();
+
+
+    let model = {
+      data: {
+        name: '',
+        number: 0,
+        id: ''
+      },
+      fetch(id) {
+        return axios.get(`/book/${id}`).then((response) => {
+          this.data = response.data;
+          return response;
+        })
+      },
+      updata(id, data) {
+        return axios.put(`/book/${id}`, data)
+          .then((response) => {
+            this.data = response.data;
+            return response;
+          })
+      }
+    }
+
+    let view = {
+      el: '#app',
+      template: `
+        <div id="app">
+        小说：《name》 数量：
+        <span id="number">number</span>
+        </div>
+        <div>
+          <button id="addOne">+1</button>
+          <button id="minusOne">-1</button>
+          <button id="reset">清零</button>
+        </div>      
+      `,
+      render(data) {
+        let html = this.template.replace('name', data.name)
+          .replace('number', data.number)
+        $(this.el).html(html);
+      }
+    }
+    var controller = {
+      init(options) {
+        // let {
+        //   view,
+        //   model
+        // } = options;
+        let view = options.view;
+        let model = options.model;
+        this.view = view;
+        this.model = model;
+        this.view.render(this.model.data);
+        this.model.fetch(1).then(() => {
+          this.view.render(this.model.data);
+        })
+      },
+      addOne() {
+        var oldNumber = +$('#number').text();
+        var newNumber = oldNumber + 1;
+        model.update({
+          number: newNumber
+        }).then((data) => {
+          view.render(model.data);
+        })
+      },
+      minusOne() {
+        var oldNumber = +$('#number').text();
+        var newNumber = oldNumber - 1;
+        model.update({
+          number: newNumber
+        }).then(() => {
+          view.render(model.data);
+        })
+      },
+      reset() {
+        model.update({
+          number: newNumber
+        }).then(() => {
+          view.render(model.data);
+        })
+      },
+      bindEvents() {
+        $(this.view.el).on('click', '#addOne', this.addOne);
+        $(this.view.el).on('click', '#minusOne', this.minusOne);
+        $(this.view.el).on('click', '#reset', this.reset);
+      }
+    }
+    
+    controller.init({view:view},{model:model});
+
+
+
+
+
+
+
+
+
+    function fakeData() { //假数据
+      let book = {
+        name: '朝花夕拾',
+        number: 2,
+        id: 1
+      }
+      axios.interceptors.response.use(function (response) {
+        let {
+          config: {
+            method,
+            url,
+            data
+          }
+        } = response; //请求的data
+
+        if (url === '/books/1' && method === 'get') {
+          response.data = book;
+        } else if (url === '/books/2' && method === 'put') {
+          // response.data = {
+          //   name: '四世同堂',
+          //   number: data.number,
+          //   id: 2
+          // }
+          Object.assign(book, data)
+          response.data = book;
+        }
+        return response;
+      })
+    }
+    // 在真正返回之前 使用这个函数  会对response做一个修改
+    // let book = {
+    //   name: '朝花夕拾',
+    //   number: 2,
+    //   id: 1
+    // }
+    // axios.interceptors.response.use(function (response) {
+    //   let {
+    //     config: {
+    //       method,
+    //       url,
+    //       data
+    //     }
+    //   } = response; //请求的data
+
+    //   if (url === '/books/1' && method === 'get') {
+    //     response.data = book;
+    //   } else if (url === '/books/2' && method === 'put') {
+    //     // response.data = {
+    //     //   name: '四世同堂',
+    //     //   number: data.number,
+    //     //   id: 2
+    //     // }
+    //     Object.assign(book,data)
+    //     response.data = book;
+    //   }
+    //   return response;
+    // })
+
+    // 假数据 上面
+    // axios.get('/books/1')
+    //   .then(({
+    //     data
+    //   }) => {
+    //     let oringinalHtml = $('#app').html();
+    //     let newHtml = oringinalHtml.replace('name', data.number)
+    //     $('#app').html(newHtml);
+    //   })
+
+    // $('#app').on('click', '#addOne', function () {
+    //   var oldNumber = +$('#number').text();
+    //   var newNumber = oldNumber + 1;
+    //   axios.put('/books/1', {
+    //     number: newNumber
+    //   }).then(() => {
+    //     $('#number').text(newNumber);
+    //   })
+    //   // oldNumber = newNumber;
+
+    // })
+    // $('#app').on('click', '#addOne', function () {
+    //   var oldNumber = +$('#number').text();
+    //   var newNumber = oldNumber - 1;
+    //   axios.put('/books/1', {
+    //     number: newNumber
+    //   }).then(() => {
+    //     $('#number').text(newNumber);
+    //   })
+    // })
+    // $('#app').on('click', '#addOne', function () {
+    //   $('#number').text(0);
+    // })
+  </script>
+</body>
+
+</html>
